@@ -1,0 +1,22 @@
+{
+  "name": "jiffy",
+  "version": "0.1.0",
+  "description": "Make a blog in a jiffy",
+  "main": "index.js",
+  "repository": "",
+  "keywords": [
+    "blog",
+    "jekyll"
+  ],
+  "author": "Joakim Bengtson <joakim@klei.se>",
+  "license": "MIT",
+  "dependencies": {
+    "marked": "~0.2.8",
+    "klei-fs": "*",
+    "color-marked": "~0.2.0",
+    "klei-dust": "~0.6.7",
+    "q": "~0.9.3",
+    "highlight.js": "~7.3.0",
+    "dustjs-linkedin": "~1.2.4"
+  }
+}

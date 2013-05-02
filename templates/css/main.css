@@ -1,0 +1,68 @@
+body {
+  background: #ecf0f1; /* CLOUDS */
+}
+body > * {
+  background: white;
+}
+body > .container > header {
+  padding: 0.5em 1em;
+}
+body > .container > footer {
+  margin-top: 2em;
+  background-color: #bdc3c7; /* SILVER */
+  color: white;
+}
+
+a {
+  color: #1ABC9C; } /* TURQUOISE */
+  a:hover {
+    color: #2ECC71; } /* EMERLAND */
+
+.navbar-inverse .navbar-inner {
+  background: #7F8C8D; /* ASBESTOS */
+}
+.navbar .nav > li > a:hover,
+.navbar-inverse .nav .active > a,
+.navbar-inverse .nav .active > a:hover,
+.navbar-inverse .nav .active > a:focus {
+  color: #1ABC9C; /* TURQUOISE */
+}
+.footer-banner {
+  background: #1ABC9C; /* TURQUOISE */
+  color: white;
+  min-height: 150px;
+}
+article pre,
+article code {
+  padding: 0;
+  border: none;
+}
+article code {
+  padding: 0.2em 0.5em;
+}
+article pre code {
+  padding: 0.5em 0;
+}
+article pre,
+article pre code {
+  -webkit-border-radius: 0;
+  -moz-border-radius: 0;
+  -mz-border-radius: 0;
+  border-radius: 0;
+}
+.content > article + article {
+  margin-top: 2em;
+}
+.content > article > * {
+  padding-left: 5%;
+  padding-right: 5%;
+}
+
+.content > article > blockquote {
+  margin-left: 5%;
+  padding-left: 1em;
+}
+
+#comments {
+  padding: 1em 5%;
+}
