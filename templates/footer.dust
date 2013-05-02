@@ -1,0 +1,13 @@
+<div class="container">
+  <div class="row-fluid">
+    <div class="span7">
+      <h3 class="footer-title">{blogTitle}</h3>
+    </div>
+    <div class="span5">
+      <div class="footer-banner">
+        <h3 class="footer-title">Kontakt</h3>
+        <p>Lorem ipsum...</p>
+      </div>
+    </div>
+  </div>
+</div>

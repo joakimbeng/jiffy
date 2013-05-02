@@ -12,7 +12,10 @@ var dir = process.cwd(),
     pkg = require('../package.json'),
     url = require('url'),
     hljs = require('highlight.js'),
-    q = require('q');
+    q = require('q'),
+    complete = require('../lib/complete'),
+    extend = require('../lib/extend'),
+    settings = require('../lib/settings');
 
 console.log('          __  __');
 console.log('     / ´ /_  /_');
@@ -20,83 +23,30 @@ console.log('  __/ / /   /  /__/  v.' + pkg.version);
 console.log('               __/');
 console.log('');
 
-var settings;
-try {
-  settings = require(join(dir, 'jiffy.json'));
-} catch (e) {
-  throw new Error('No jiffy.json found in current folder!');
-}
+settings = settings(dir);
 
-if (!settings.title)
-  throw new Error('Your blog needs a title, missing "title" in jiffy.json!');
-
-if (!settings.url)
-  throw new Error('Your blog needs an url, missing "url" in jiffy.json!');
-
-if (!settings.authors)
-  throw new Error('Your blog needs at least one author! Missing "authors" in jiffy.json!');
-
-if (!settings.authors.length)
-  throw new Error('Your blog needs an author! "authors" cannot be empty!');
-
-if (settings.authors.length > 1 && !hasDefaultAuthor())
-  console.warn('When more than one author exists, it\'s good to mark one of them as default, with "default": true');
-
-function hasDefaultAuthor () {
-  return settings.authors.length === 1
-      || settings.authors.some(function (author) {
-           return author.default;
-         });
-}
-
-function getDefaultAuthor () {
-  if (settings.authors.length === 1)
-    return settings.authors[0];
-  return settings.authors.filter(function (author) {
-    return author.default;
-  })[0];
-}
-
-function getAuthor (identifier) {
-  return settings.authors.filter(function (author) {
-    return author.identifier === identifier;
-  })[0];
-}
-
-// Defaults:
-settings.dirs = settings.dirs || {};
-
-var postsDir = join(dir, settings.dirs.posts || 'posts'),
-    buildDir = join(dir, settings.dirs.build || 'build'),
-    templateDir = join(__dirname, '..', 'templates'),
-    cssDir = join(buildDir, 'css');
-
-if (!exists(postsDir))
-  throw new Error('Missing posts directory: "' + postsDir + '"');
+if (!exists(settings.postsDir))
+  throw new Error('Missing posts directory: "' + settings.postsDir + '"');
 
 var started = Date.now();
 console.log('started');
 
 
-if (!exists(buildDir)) {
+if (!exists(settings.buildDir)) {
   console.log('Creating build directory...');
-  fs.mkdirSync(buildDir, function (err) {
+  fs.mkdirSync(settings.buildDir, function (err) {
     if (err) throw err;
   });
 }
 
-if (!exists(cssDir)) {
+if (!exists(settings.cssDir)) {
   console.log('Creating css directory...');
-  fs.mkdirSync(cssDir, function (err) {
+  fs.mkdirSync(settings.cssDir, function (err) {
     if (err) throw err;
   });
 }
 
-kleiDust.setOptions({root: templateDir});
-
-var async = require('async');
-
-
+kleiDust.setOptions({root: settings.templateDir});
 
 var highlight = function(code, lang){
   if(!hljs) return code;
@@ -114,36 +64,6 @@ function getPostDate(dir) {
 
 function postNameToFileName (postName) {
   return postName.toLowerCase().split(' ').join('-') + '.html';
-}
-
-function complete(obj) {
-  var keys = Object.keys(obj);
-  // console.log(keys);
-  var promises = keys.map(function (key) {
-    return obj[key];
-  });
-  // console.log(promises);
-    return q.when(promises, function (promises) {
-        var countDown = 0;
-        var deferred = q.defer();
-        promises.reduce(function (undefined, promise, index) {
-            if (q.isFulfilled(promise)) {
-                obj[keys[index]] = promises[index] = q.nearer(promise);
-            } else {
-                ++countDown;
-                q.when(promise, function (value) {
-                    obj[keys[index]] = promises[index] = value;
-                    if (--countDown === 0) {
-                        deferred.resolve(obj);
-                    }
-                }, deferred.reject);
-            }
-        }, void 0);
-        if (countDown === 0) {
-            deferred.resolve(obj);
-        }
-        return deferred.promise;
-    });
 }
 
 fs.readJson = function (file, cb) {
@@ -169,7 +89,7 @@ function isMarkdown (file) {
 }
 
 
-var postsPromise = readDir(postsDir).then(function (postDirs) {
+var postsPromise = readDir(settings.postsDir).then(function (postDirs) {
   return q.all(postDirs.map(function (dir) {
     var post = {};
         post.name = getPostName(dir);
@@ -183,9 +103,9 @@ var postsPromise = readDir(postsDir).then(function (postDirs) {
     var hasPost = false,
         hasMeta = false;
 
-    readDir(join(postsDir, dir)).then(function (files) {
+    readDir(join(settings.postsDir, dir)).then(function (files) {
       files.forEach(function (fileName) {
-        var file = join(postsDir, dir, fileName);
+        var file = join(settings.postsDir, dir, fileName);
         if (isMarkdown(file)) {
           hasPost = true;
           markdown.resolve(readFile(file, 'utf-8'));
@@ -237,54 +157,33 @@ function compileMarkdown (htmlDeferred, markdown) {
   });
 }
 
-/**
- * 1. Ta fram alla inläggsmappar
- * 2. Ta fram information för varje inlägg
- *  a. Läs in markdown
- *  b. Läs in meta
- *  c. Kompilera markdown till html
- * 3. Kompilera dust till html
- */
-
 postsPromise.then(function (posts) {
   var promises = [];
 
-  var indexData = {
-    posts: posts,
+  var data = {
     blogTitle: settings.title,
     blogUrl: settings.url,
     blogProtocol: url.parse(settings.url).protocol || 'http://',
     disqusShortname: settings.disqusShortname
   };
 
-  promises.push(dust('index', indexData).then(function (out) {
-    return writeFile(join(buildDir, 'index.html'), out, 'utf-8');
-  }));
+  promises = posts.map(function (post) {
+    post.author = settings.getAuthor(post.meta.author);
 
-  posts.forEach(function (post) {
-    var author;
-    if (post.meta.author)
-      author = getAuthor(post.meta.author);
-    else if (hasDefaultAuthor())
-      author = getDefaultAuthor();
-    if (!author)
-      throw new Error('Post: "' + post.name + '" is missing an author, and no default author exists!');
+    var postData = extend({post: post, url: post.url}, data);
 
-    post.author = author;
-
-    var data = {
-      post: post,
-      url: post.url,
-      blogTitle: settings.title,
-      blogUrl: settings.url,
-      blogProtocol: url.parse(settings.url).protocol || 'http://',
-      disqusShortname: settings.disqusShortname
-    };
-
-    promises.push(dust('post', data).then(function (out) {
-      return writeFile(join(buildDir, post.url), out, 'utf-8');
-    }));
+    return dust('post', postData).then(function (out) {
+      return writeFile(join(settings.buildDir, post.url), out, 'utf-8');
+    });
   });
+
+  var indexData = extend({posts: posts}, data);
+
+  var indexPromise = dust('index', indexData).then(function (out) {
+    return writeFile(join(settings.buildDir, 'index.html'), out, 'utf-8');
+  });
+
+  promises.push(indexPromise);
 
   return q.all(promises);
 }).then(function () {
@@ -293,12 +192,12 @@ postsPromise.then(function (posts) {
 
 
 // Copy css:
-readDir(join(templateDir, 'css'))
+readDir(join(settings.templateDir, 'css'))
   .then(function (files) {
     return q.all(files.map(function (file) {
-      return readFile(join(templateDir, 'css', file))
+      return readFile(join(settings.templateDir, 'css', file))
         .then(function (content) {
-          return writeFile(join(cssDir, file), content, 'utf-8');
+          return writeFile(join(settings.cssDir, file), content, 'utf-8');
         });
     }));
   })

@@ -6,14 +6,13 @@
 <html>
 <!--<![endif]-->
   <head>
-    <meta charset="utf-8">
+    <meta charset="utf-8" />
     <title>{+title/}{blogTitle}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="css/bootstrap.css" rel="stylesheet" />
     <link href="css/flat-ui.css" rel="stylesheet" />
     <link href="css/monokai_sublime.css" rel="stylesheet" />
     <link href="css/main.css" rel="stylesheet" />
-    <!--<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.6/angular.min.js"></script>-->
   </head>
   <body>
     <div class="container">
@@ -32,19 +31,7 @@
       </div>
 
       <footer>
-        <div class="container">
-          <div class="row-fluid">
-            <div class="span7">
-              <h3 class="footer-title">{blogTitle}</h3>
-            </div>
-            <div class="span5">
-              <div class="footer-banner">
-                <h3 class="footer-title">Kontakt</h3>
-                <p>Lorem ipsum...</p>
-              </div>
-            </div>
-          </div>
-        </div>
+        {>footer/}
       </footer>
     </div>
   </body>
