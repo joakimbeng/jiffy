@@ -17,6 +17,7 @@
     "klei-dust": "~0.6.7",
     "q": "~0.9.3",
     "highlight.js": "~7.3.0",
-    "dustjs-linkedin": "~1.2.4"
+    "dustjs-linkedin": "~1.2.4",
+    "html-truncate": "~1.0.3"
   }
 }

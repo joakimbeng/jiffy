@@ -13,6 +13,7 @@ var dir = process.cwd(),
     url = require('url'),
     hljs = require('highlight.js'),
     q = require('q'),
+    truncate = require('html-truncate'),
     complete = require('../lib/complete'),
     extend = require('../lib/extend'),
     settings = require('../lib/settings');
@@ -126,7 +127,7 @@ var postsPromise = readDir(settings.postsDir).then(function (postDirs) {
     post.markdown = markdown.promise;
     post.created = created.promise;
     post.content = getHtml(markdown.promise);
-    post.shortContent = getHtml(markdown.promise);
+    post.shortContent = getShortHtml(post.content);
     post.meta = meta.promise;
 
     return complete(post);
@@ -148,6 +149,21 @@ function getHtml (markdown) {
     compileMarkdown(html, markdown);
   }
   return html.promise;
+}
+
+function getShortHtml (html) {
+  if (!settings.truncate)
+    return html;
+
+  var shortHtml = q.defer();
+  if (q.isPromise(html)) {
+    html.then(function (code) {
+      shortHtml.resolve(truncate(code, settings.truncate));
+    });
+  } else {
+    shortHtml.resolve(truncate(code, settings.truncate));
+  }
+  return shortHtml.promise;
 }
 
 function compileMarkdown (htmlDeferred, markdown) {
