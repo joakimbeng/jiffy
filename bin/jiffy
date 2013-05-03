@@ -47,6 +47,20 @@ if (!exists(settings.cssDir)) {
   });
 }
 
+if (!exists(join(settings.buildDir, 'tags'))) {
+  console.log('Creating tags directory...');
+  fs.mkdirSync(join(settings.buildDir, 'tags'), function (err) {
+    if (err) throw err;
+  });
+}
+
+if (!exists(join(settings.buildDir, 'posts'))) {
+  console.log('Creating posts directory...');
+  fs.mkdirSync(join(settings.buildDir, 'posts'), function (err) {
+    if (err) throw err;
+  });
+}
+
 kleiDust.setOptions({root: settings.templateDir});
 
 var highlight = function(code, lang){
@@ -63,8 +77,8 @@ function getPostDate(dir) {
   return base(dir).split(' - ')[0];
 }
 
-function postNameToFileName (postName) {
-  return postName.toLowerCase().split(' ').join('-') + '.html';
+function nameToFileName (name) {
+  return name.toLowerCase().split(' ').join('-') + '.html';
 }
 
 fs.readJson = function (file, cb) {
@@ -95,7 +109,7 @@ var postsPromise = readDir(settings.postsDir).then(function (postDirs) {
     var post = {};
         post.name = getPostName(dir);
         post.date = getPostDate(dir);
-        post.url = postNameToFileName(post.name);
+        post.url = nameToFileName(post.name);
 
     var markdown = q.defer(),
         created = q.defer(),
@@ -129,6 +143,8 @@ var postsPromise = readDir(settings.postsDir).then(function (postDirs) {
     post.content = getHtml(markdown.promise);
     post.shortContent = getShortHtml(post.content);
     post.meta = meta.promise;
+    post.author = getAuthor(meta.promise);
+    post.tags = getTags(meta.promise);
 
     return complete(post);
   }));
@@ -173,6 +189,34 @@ function compileMarkdown (htmlDeferred, markdown) {
   });
 }
 
+function getAuthor (meta) {
+  var author = q.defer();
+  if (q.isPromise(meta)) {
+    meta.then(function (meta) {
+      author.resolve(settings.getAuthor(meta.author));
+    });
+  } else {
+    author.resolve(settings.getAuthor(meta.author));
+  }
+  return author.promise;
+}
+
+function getTags (meta) {
+  var tags = q.defer();
+  if (q.isPromise(meta)) {
+    meta.then(function (meta) {
+      tags.resolve((meta.tags || []).map(function (tag) {
+        return {tag: tag, url: nameToFileName(tag)};
+      }));
+    });
+  } else {
+    tags.resolve((meta.tags || []).map(function (tag) {
+      return {tag: tag, url: nameToFileName(tag)};
+    }));
+  }
+  return tags.promise;
+}
+
 postsPromise.then(function (posts) {
   var promises = [];
 
@@ -184,14 +228,30 @@ postsPromise.then(function (posts) {
   };
 
   promises = posts.map(function (post) {
-    post.author = settings.getAuthor(post.meta.author);
-
-    var postData = extend({post: post, url: post.url}, data);
+    var postData = extend({post: post, path: '../'}, data);
 
     return dust('post', postData).then(function (out) {
-      return writeFile(join(settings.buildDir, post.url), out, 'utf-8');
+      return writeFile(join(settings.buildDir, 'posts', post.url), out, 'utf-8');
     });
   });
+
+  var tags = {};
+
+  posts.forEach(function (post) {
+    post.tags.forEach(function (tag) {
+      if (!tags[tag.tag])
+        tags[tag.tag] = extend({posts: []}, tag);
+      tags[tag.tag].posts.push(post);
+    });
+  });
+
+  promises.concat(Object.keys(tags).map(function (tag) {
+    var tagData = extend({path: '../'}, tags[tag], data);
+
+    return dust('tag', tagData).then(function (out) {
+      return writeFile(join(settings.buildDir, 'tags', tags[tag].url), out, 'utf-8');
+    });
+  }));
 
   var indexData = extend({posts: posts}, data);
 

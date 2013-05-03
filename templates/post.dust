@@ -3,14 +3,20 @@
 {<title}{post.name} - {/title}
 
 {<body}
-  {#post}
   <article>
     <header>
-      <h1>{name}</h1>
-      <p><time>{date}</time>, {author.name}</p>
+      <h1>{post.name}</h1>
+      <p><time>{post.date}</time>, {post.author.name}</p>
     </header>
-    {content|s}
+    {post.content|s}
     <footer>
+      {?post.tags}
+      <div class="tags">
+        {#post.tags}
+          <a class="tag" href="{path}tags/{url}">{tag}</a>
+        {/post.tags}
+      </div>
+      {/post.tags}
       <p>Dela...</p>
     </footer>
   </article>
@@ -19,13 +25,11 @@
     <h2>Kommentarer</h2>
     <div id="disqus_thread"></div>
     <script type="text/javascript">
-        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
         var disqus_shortname = '{disqusShortname}';
-        var disqus_identifier = '{url}';
-        var disqus_url = '{blogUrl}/{url}';
-        var disqus_title = '{name} - {blogTitle}';
+        var disqus_identifier = '{post.url}';
+        var disqus_url = '{blogUrl}/{post.url}';
+        var disqus_title = '{post.name} - {blogTitle}';
 
-        /* * * DON'T EDIT BELOW THIS LINE * * */
         (function() {
             var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
             dsq.src = '{blogProtocol}' + disqus_shortname + '.disqus.com/embed.js';
@@ -36,5 +40,4 @@
     <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
   </section>
   {/disqusShortname}
-  {/post}
 {/body}

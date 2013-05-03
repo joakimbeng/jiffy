@@ -3,7 +3,7 @@
     <div class="container">
       <nav class="nav-collapse">
         <ul class="nav">
-          <li{^url} class="active"{/url}><a href="index.html">Hem</a></li>
+          <li{^url} class="active"{/url}><a href="{path}index.html">Home</a></li>
         </ul>
       </nav>
     </div>

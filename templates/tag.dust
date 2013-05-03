@@ -1,10 +1,11 @@
 {>layout/}
 
 {<body}
+  <h2>Tag: {tag}</h2>
   {#posts}
     <article>
       <header>
-        <h2><a href="posts/{url}">{name}</a></h2>
+        <h2><a href="{path}posts/{url}">{name}</a></h2>
         <p><time>{date}</time>, {author.name}</p>
       </header>
       {shortContent|s}
