@@ -24,7 +24,7 @@
       </header>
 
       <div class="menu row-fluid">
-        {>menu/}
+        {>"partials/menu"/}
       </div>
 
       <div class="content row-fluid">
@@ -32,7 +32,7 @@
       </div>
 
       <footer>
-        {>footer/}
+        {>"partials/footer"/}
       </footer>
     </div>
   </body>

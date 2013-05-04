@@ -1,4 +1,4 @@
-{>layout/}
+{>"layouts/default"/}
 
 {<title}{post.name} - {/title}
 
@@ -7,15 +7,15 @@
   <article>
     <header>
       <h1>{name}</h1>
-      {>post-meta/}
+      {>"partials/post-meta"/}
     </header>
     {content|s}
     <footer>
-      {>post-footer/}
+      {>"partials/post-footer"/}
     </footer>
   </article>
   {/post}
   {?disqusShortname}
-    {>post-comments/}
+    {>"partials/post-comments"/}
   {/disqusShortname}
 {/body}

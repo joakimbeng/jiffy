@@ -1,15 +1,18 @@
-{>layout/}
+{>"layouts/default"/}
 
 {<body}
-  <h2><i class="icon-tag" title="Tag"></i>&nbsp;{tag.name}</h2>
+  <h2>
+    <i class="icon-tag" title="Tag"></i>
+    &nbsp;{tag.name}
+  </h2>
   {#posts}
     <article>
       <header>
-        {>post-header/}
+        {>"partials/post-header"/}
       </header>
       {shortContent|s}
       <footer>
-        {>post-footer/}
+        {>"partials/post-footer"/}
       </footer>
     </article>
   {/posts}

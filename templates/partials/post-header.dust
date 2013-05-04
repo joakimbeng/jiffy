@@ -1,2 +1,2 @@
 <h2><a href="{path}{url}">{name}</a></h2>
-{>post-meta/}
+{>"partials/post-meta"/}
