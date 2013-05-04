@@ -13,22 +13,7 @@ body > .container > footer {
   color: white;
 }
 
-a {
-  color: #1ABC9C; } /* TURQUOISE */
-  a:hover {
-    color: #2ECC71; } /* EMERLAND */
-
-.navbar-inverse .navbar-inner {
-  background: #7F8C8D; /* ASBESTOS */
-}
-.navbar .nav > li > a:hover,
-.navbar-inverse .nav .active > a,
-.navbar-inverse .nav .active > a:hover,
-.navbar-inverse .nav .active > a:focus {
-  color: #1ABC9C; /* TURQUOISE */
-}
 .footer-banner {
-  background: #1ABC9C; /* TURQUOISE */
   color: white;
   min-height: 150px;
 }
@@ -64,10 +49,17 @@ article pre code {
   padding-right: 5%;
 }
 
+article > header > p {
+  color: #bdc3c7; /* SILVER */ }
+  article > header > p i {
+    margin-right: 0.5em; }
+
 article > footer .tags-label {
   padding-right: 1em;
-  color: #bdc3c7; /* SILVER */
-}
+  color: #bdc3c7; /* SILVER */ }
+  article > footer .tags-label i {
+    margin-right: 0.5em; }
+
 article > footer .tag {
   border-radius: 4px;
   background: #1abc9c;

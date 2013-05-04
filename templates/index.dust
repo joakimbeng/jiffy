@@ -4,12 +4,11 @@
   {#posts}
     <article>
       <header>
-        <h2><a href="{url}">{name}</a></h2>
-        <p><time>{date}</time>, {author.name}</p>
+        {>post-header/}
       </header>
       {shortContent|s}
       <footer>
-        <p>Dela...</p>
+        {>post-footer/}
       </footer>
     </article>
   {/posts}

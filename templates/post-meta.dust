@@ -1,0 +1,4 @@
+<p>
+  <time><i class="icon-time"></i> {date}</time><br />
+  <span><i class="icon-user"></i> {author.name}</span>
+</p>

@@ -1,0 +1,11 @@
+{?tags}
+<div class="tags">
+  <span class="tags-label">
+    <i class="icon-tags"></i>
+    Tags:
+  </span>
+  {#tags}
+    <a class="tag" href="{path}{url}">{name}</a>
+  {/tags}
+</div>
+{/tags}

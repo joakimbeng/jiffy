@@ -1,16 +1,15 @@
 {>layout/}
 
 {<body}
-  <h2>Category: {category.name}</h2>
+  <h2><i class="icon-folder-open" title="Category"></i>&nbsp;{category.name}</h2>
   {#posts}
     <article>
       <header>
-        <h2><a href="{path}{url}">{name}</a></h2>
-        <p><time>{date}</time>, {author.name}</p>
+        {>post-header/}
       </header>
       {shortContent|s}
       <footer>
-        <p>Dela...</p>
+        {>post-footer/}
       </footer>
     </article>
   {/posts}

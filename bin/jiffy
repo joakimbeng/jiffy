@@ -7,6 +7,7 @@ var dir = process.cwd(),
     dirname = require('path').dirname,
     fs = require('klei-fs'),
     exists = fs.existsSync,
+    ncp = require('ncp').ncp,
     marked = require('marked'),
     kleiDust = require('klei-dust'),
     pkg = require('../package.json'),
@@ -43,6 +44,13 @@ if (!exists(settings.buildDir)) {
 if (!exists(settings.cssDir)) {
   console.log('Creating css directory...');
   fs.mkdirSync(settings.cssDir, function (err) {
+    if (err) throw err;
+  });
+}
+
+if (!exists(settings.fontDir)) {
+  console.log('Creating font directory...');
+  fs.mkdirSync(settings.fontDir, function (err) {
     if (err) throw err;
   });
 }
@@ -113,6 +121,7 @@ var readJson = q.denodeify(fs.readJson);
 var stat = q.denodeify(fs.stat);
 var dust = q.denodeify(kleiDust.dust);
 var writeFile = q.denodeify(fs.writeFile);
+var copy = q.denodeify(ncp);
 
 function isJson (file) {
   return ext(file) === '.json';
@@ -312,16 +321,14 @@ postsPromise.then(function (posts) {
 
 
 // Copy css:
-readDir(join(settings.templateDir, 'css'))
-  .then(function (files) {
-    return q.all(files.map(function (file) {
-      return readFile(join(settings.templateDir, 'css', file))
-        .then(function (content) {
-          return writeFile(join(settings.cssDir, file), content, 'utf-8');
-        });
-    }));
-  })
+copy(join(settings.templateDir, 'css'), settings.cssDir)
   .then(function () {
     console.log('Css files copied...');
+  });
+
+// Copy fonts:
+copy(join(settings.templateDir, 'font'), settings.fontDir)
+  .then(function () {
+    console.log('font files copied...');
   });
 
