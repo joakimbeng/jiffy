@@ -53,6 +53,12 @@ article pre code {
 .content > article + article {
   margin-top: 3em;
 }
+.content > h1,
+.content > h2,
+.content > h3,
+.content > h4,
+.content > h5,
+.content > h6,
 .content > article > * {
   padding-left: 5%;
   padding-right: 5%;

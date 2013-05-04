@@ -1,7 +1,7 @@
 {>layout/}
 
 {<body}
-  <h2>Tag: {tag.name}</h2>
+  <h2>Category: {category.name}</h2>
   {#posts}
     <article>
       <header>

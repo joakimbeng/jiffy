@@ -61,6 +61,14 @@ if (!exists(join(settings.buildDir, 'posts'))) {
   });
 }
 
+if (!exists(join(settings.buildDir, 'category'))) {
+  console.log('Creating category directory...');
+  fs.mkdirSync(join(settings.buildDir, 'category'), function (err) {
+    if (err) throw err;
+  });
+}
+
+
 kleiDust.setOptions({root: settings.templateDir});
 
 var highlight = function(code, lang){
@@ -142,7 +150,7 @@ var postsPromise = readDir(settings.postsDir).then(function (postDirs) {
     post.created = created.promise;
     post.content = getHtml(markdown.promise);
     post.shortContent = getShortHtml(post.content);
-    post.meta = meta.promise;
+    post.category = getCategory(meta.promise);
     post.author = getAuthor(meta.promise);
     post.tags = getTags(meta.promise);
 
@@ -189,32 +197,25 @@ function compileMarkdown (htmlDeferred, markdown) {
   });
 }
 
+function getCategory (meta) {
+  return meta.then(function (meta) {
+    var name = meta.category || 'Uncategorized';
+    return {name: name, url: nameToFileName(name)};
+  });
+}
+
 function getAuthor (meta) {
-  var author = q.defer();
-  if (q.isPromise(meta)) {
-    meta.then(function (meta) {
-      author.resolve(settings.getAuthor(meta.author));
-    });
-  } else {
-    author.resolve(settings.getAuthor(meta.author));
-  }
-  return author.promise;
+  return meta.then(function (meta) {
+    return settings.getAuthor(meta.author);
+  });
 }
 
 function getTags (meta) {
-  var tags = q.defer();
-  if (q.isPromise(meta)) {
-    meta.then(function (meta) {
-      tags.resolve((meta.tags || []).map(function (tag) {
-        return {tag: tag, url: nameToFileName(tag)};
-      }));
+  return meta.then(function (meta) {
+    return (meta.tags || []).map(function (name) {
+      return {name: name, url: nameToFileName(name)};
     });
-  } else {
-    tags.resolve((meta.tags || []).map(function (tag) {
-      return {tag: tag, url: nameToFileName(tag)};
-    }));
-  }
-  return tags.promise;
+  });
 }
 
 postsPromise.then(function (posts) {
@@ -227,6 +228,47 @@ postsPromise.then(function (posts) {
     disqusShortname: settings.disqusShortname
   };
 
+  var tags = {};
+
+  posts.forEach(function (post) {
+    post.tags.forEach(function (tag) {
+      if (!tags[tag.name])
+        tags[tag.name] = {posts: [], tag: tag};
+      tags[tag.name].posts.push(post);
+    });
+  });
+
+  var categories = {};
+
+  posts.forEach(function (post) {
+    if (!categories[post.category.name])
+      categories[post.category.name] = {posts: [], category: post.category};
+    categories[post.category.name].posts.push(post);
+  });
+
+  data.tags = Object.keys(tags).map(function (tag) {
+    return tags[tag];
+  });
+  data.categories = Object.keys(categories).map(function (category) {
+    return categories[category];
+  });
+
+  promises.concat(data.tags.map(function (tag) {
+    var tagData = extend({path: '../'}, tag, data);
+
+    return dust('tag', tagData).then(function (out) {
+      return writeFile(join(settings.buildDir, 'tags', tagData.tag.url), out, 'utf-8');
+    });
+  }));
+
+  promises.concat(data.categories.map(function (category) {
+    var categoryData = extend({path: '../'}, category, data);
+
+    return dust('category', categoryData).then(function (out) {
+      return writeFile(join(settings.buildDir, 'category', categoryData.category.url), out, 'utf-8');
+    });
+  }));
+
   promises = posts.map(function (post) {
     var postData = extend({post: post, path: '../'}, data);
 
@@ -234,24 +276,6 @@ postsPromise.then(function (posts) {
       return writeFile(join(settings.buildDir, 'posts', post.url), out, 'utf-8');
     });
   });
-
-  var tags = {};
-
-  posts.forEach(function (post) {
-    post.tags.forEach(function (tag) {
-      if (!tags[tag.tag])
-        tags[tag.tag] = extend({posts: []}, tag);
-      tags[tag.tag].posts.push(post);
-    });
-  });
-
-  promises.concat(Object.keys(tags).map(function (tag) {
-    var tagData = extend({path: '../'}, tags[tag], data);
-
-    return dust('tag', tagData).then(function (out) {
-      return writeFile(join(settings.buildDir, 'tags', tags[tag].url), out, 'utf-8');
-    });
-  }));
 
   var indexData = extend({posts: posts}, data);
 

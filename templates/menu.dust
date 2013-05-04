@@ -4,6 +4,9 @@
       <nav class="nav-collapse">
         <ul class="nav">
           <li{^url} class="active"{/url}><a href="{path}index.html">Home</a></li>
+          {#categories}
+          <li><a href="{path}category/{category.url}">{category.name}</a></li>
+          {/categories}
         </ul>
       </nav>
     </div>
