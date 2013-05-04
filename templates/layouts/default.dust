@@ -35,5 +35,8 @@
         {>"partials/footer"/}
       </footer>
     </div>
+    {?googleAnalytics}
+      {>"partials/analytics"/}
+    {/googleAnalytics}
   </body>
 </html>

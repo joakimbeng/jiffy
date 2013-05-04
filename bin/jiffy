@@ -262,7 +262,8 @@ postsPromise.then(function (posts) {
     blogTitle: settings.title,
     blogUrl: settings.url,
     blogProtocol: url.parse(settings.url).protocol || 'http://',
-    disqusShortname: settings.disqusShortname
+    disqusShortname: settings.services.disqus,
+    googleAnalytics: settings.services.googleAnalytics
   };
 
   var tags = getTagsFromPosts(posts);
