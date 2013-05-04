@@ -3,9 +3,9 @@
     <div class="container">
       <nav class="nav-collapse">
         <ul class="nav">
-          <li{^url} class="active"{/url}><a href="{path}index.html">Home</a></li>
+          <li{^currentUrl} class="active"{/currentUrl}><a href="{path}index.html">Home</a></li>
           {#categories}
-          <li><a href="{path}category/{category.url}">{category.name}</a></li>
+          <li{@if cond="'{category.url}' == '{currentUrl}'"} class="active"{/if}><a href="{path}{category.url}">{category.name}</a></li>
           {/categories}
         </ul>
       </nav>

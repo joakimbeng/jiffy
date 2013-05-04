@@ -69,7 +69,10 @@ if (!exists(join(settings.buildDir, 'category'))) {
 }
 
 
-kleiDust.setOptions({root: settings.templateDir});
+kleiDust.setOptions({
+  root: settings.templateDir,
+  useHelpers: true
+});
 
 var highlight = function(code, lang){
   if(!hljs) return code;
@@ -85,8 +88,16 @@ function getPostDate(dir) {
   return base(dir).split(' - ')[0];
 }
 
-function nameToFileName (name) {
-  return name.toLowerCase().split(' ').join('-') + '.html';
+function nameToFileName (dir, name) {
+  return join(dir, urlFriendlyName(name) + '.html');
+}
+
+function nameToUrl (dir, name) {
+  return dir + '/' + urlFriendlyName(name) + '.html';
+}
+
+function urlFriendlyName (name) {
+  return name.toLowerCase().split(' ').join('-');
 }
 
 fs.readJson = function (file, cb) {
@@ -117,7 +128,8 @@ var postsPromise = readDir(settings.postsDir).then(function (postDirs) {
     var post = {};
         post.name = getPostName(dir);
         post.date = getPostDate(dir);
-        post.url = nameToFileName(post.name);
+        post.url = nameToUrl('posts', post.name);
+        post.fileName = nameToFileName('posts', post.name);
 
     var markdown = q.defer(),
         created = q.defer(),
@@ -200,7 +212,11 @@ function compileMarkdown (htmlDeferred, markdown) {
 function getCategory (meta) {
   return meta.then(function (meta) {
     var name = meta.category || 'Uncategorized';
-    return {name: name, url: nameToFileName(name)};
+    return {
+      name: name,
+      url: nameToUrl('category', name),
+      fileName: nameToFileName('category', name)
+    };
   });
 }
 
@@ -213,7 +229,11 @@ function getAuthor (meta) {
 function getTags (meta) {
   return meta.then(function (meta) {
     return (meta.tags || []).map(function (name) {
-      return {name: name, url: nameToFileName(name)};
+      return {
+        name: name,
+        url: nameToUrl('tags', name),
+        fileName: nameToFileName('tags', name)
+      };
     });
   });
 }
@@ -254,26 +274,26 @@ postsPromise.then(function (posts) {
   });
 
   promises.concat(data.tags.map(function (tag) {
-    var tagData = extend({path: '../'}, tag, data);
+    var tagData = extend({path: '../', currentUrl: tag.tag.url}, tag, data);
 
     return dust('tag', tagData).then(function (out) {
-      return writeFile(join(settings.buildDir, 'tags', tagData.tag.url), out, 'utf-8');
+      return writeFile(join(settings.buildDir, tagData.tag.fileName), out, 'utf-8');
     });
   }));
 
   promises.concat(data.categories.map(function (category) {
-    var categoryData = extend({path: '../'}, category, data);
+    var categoryData = extend({path: '../', currentUrl: category.category.url}, category, data);
 
     return dust('category', categoryData).then(function (out) {
-      return writeFile(join(settings.buildDir, 'category', categoryData.category.url), out, 'utf-8');
+      return writeFile(join(settings.buildDir, categoryData.category.fileName), out, 'utf-8');
     });
   }));
 
   promises = posts.map(function (post) {
-    var postData = extend({post: post, path: '../'}, data);
+    var postData = extend({post: post, path: '../', currentUrl: post.url}, data);
 
     return dust('post', postData).then(function (out) {
-      return writeFile(join(settings.buildDir, 'posts', post.url), out, 'utf-8');
+      return writeFile(join(settings.buildDir, post.fileName), out, 'utf-8');
     });
   });
 

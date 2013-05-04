@@ -12,12 +12,12 @@
     <footer>
       {?post.tags}
       <div class="tags">
+        <span class="tags-label">Tags:</span>
         {#post.tags}
-          <a class="tag" href="{path}tags/{url}">{name}</a>
+          <a class="tag" href="{path}{url}">{name}</a>
         {/post.tags}
       </div>
       {/post.tags}
-      <p>Dela...</p>
     </footer>
   </article>
   {?disqusShortname}

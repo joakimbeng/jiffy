@@ -4,7 +4,7 @@
   {#posts}
     <article>
       <header>
-        <h2><a href="posts/{url}">{name}</a></h2>
+        <h2><a href="{url}">{name}</a></h2>
         <p><time>{date}</time>, {author.name}</p>
       </header>
       {shortContent|s}
