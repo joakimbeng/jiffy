@@ -140,8 +140,11 @@ var postsPromise = readDir(settings.postsDir).then(function (postDirs) {
         post.url = nameToUrl('posts', post.name);
         post.fileName = nameToFileName('posts', post.name);
 
+    if (dir[0] === '.' || !post.name)
+      return;
+
     var markdown = q.defer(),
-        created = q.defer(),
+        modified = q.defer(),
         meta = q.defer();
 
     var hasPost = false,
@@ -154,7 +157,7 @@ var postsPromise = readDir(settings.postsDir).then(function (postDirs) {
           hasPost = true;
           markdown.resolve(readFile(file, 'utf-8'));
           stat(file).then(function (stats) {
-            created.resolve(stats.ctime);
+            modified.resolve(stats.mtime);
           });
         } else if (isJson(file)) {
           hasMeta = true;
@@ -168,7 +171,7 @@ var postsPromise = readDir(settings.postsDir).then(function (postDirs) {
     });
 
     post.markdown = markdown.promise;
-    post.created = created.promise;
+    post.modified = modified.promise;
     post.content = getHtml(markdown.promise);
     post.shortContent = getShortHtml(post.content);
     post.category = getCategory(meta.promise);
@@ -250,6 +253,10 @@ function getTags (meta) {
 postsPromise.then(function (posts) {
   var promises = [];
 
+  posts = removeInvalidPosts(posts);
+
+  sortPostsByDate(posts);
+
   var data = {
     blogTitle: settings.title,
     blogUrl: settings.url,
@@ -318,6 +325,24 @@ postsPromise.then(function (posts) {
 }).then(function () {
   console.log('done', Date.now() - started);
 });
+
+function removeInvalidPosts (posts) {
+  return posts.filter(function (post) { return post; });
+}
+
+function sortPostsByDate (posts) {
+  posts.sort(function (a, b) {
+    if (a.date > b.date)
+      return -1;
+    else if (a.date < b.date)
+      return 1;
+    else if (a.name > b.name)
+      return -1;
+    else if (a.name < b.name)
+      return 1;
+    return 0;
+  });
+}
 
 
 // Copy css:
