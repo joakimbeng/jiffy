@@ -1,4 +1,5 @@
 <p>
-  <time><i class="icon-time"></i> {date}</time><br />
-  <span><i class="icon-user"></i> {author.name}</span>
+  <time><i class="icon-time"></i> {date}</time>
+  <br /><span><i class="icon-user"></i> {author.name}</span>
+  {^inCategory}<br /><span><i class="icon-folder-close"></i> <a href="{path}{category.url}">{category.name}</a></span>{/inCategory}
 </p>
