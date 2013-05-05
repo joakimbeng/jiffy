@@ -11,6 +11,7 @@ var dir = process.cwd(),
     q = require('q'),
     truncate = require('html-truncate'),
     fs = require('../lib/fs'),
+    dust = require('../lib/dust'),
     highlight = require('../lib/highlight'),
     complete = require('../lib/complete'),
     extend = require('../lib/extend'),
@@ -23,8 +24,6 @@ console.log('  __/ / /   /  /__/  v.' + pkg.version);
 console.log('               __/');
 console.log('');
 
-settings = settings(dir);
-
 // fs.exists(settings.postsDir).then(function (exists) {
 //   if (!exists)
 //     throw new Error('Missing posts directory: "' + settings.postsDir + '"');
@@ -32,8 +31,6 @@ settings = settings(dir);
 
 var started = Date.now();
 console.log('started');
-
-var dust = require('../lib/dust')(settings.templateDir);
 
 
 function getPostDate(dir) {
@@ -124,36 +121,17 @@ function getPostName(dir) {
 }
 
 function getHtml (markdown) {
-  var html = q.defer();
-  if (q.isPromise(markdown)) {
-    markdown.then(function (markdown) {
-      compileMarkdown(html, markdown);
-    });
-  } else {
-    compileMarkdown(html, markdown);
-  }
-  return html.promise;
+  return markdown.then(function (markdown) {
+    return marked(markdown, {highlight: highlight});
+  });
 }
 
 function getShortHtml (html) {
   if (!settings.truncate)
     return html;
 
-  var shortHtml = q.defer();
-  if (q.isPromise(html)) {
-    html.then(function (code) {
-      shortHtml.resolve(truncate(code, settings.truncate));
-    });
-  } else {
-    shortHtml.resolve(truncate(code, settings.truncate));
-  }
-  return shortHtml.promise;
-}
-
-function compileMarkdown (htmlDeferred, markdown) {
-  setTimeout(function () {
-    var result = marked(markdown, {highlight: highlight});
-    htmlDeferred.resolve(result);
+  return html.then(function (code) {
+    return truncate(code, settings.truncate);
   });
 }
 
@@ -305,15 +283,9 @@ function getCategoriesFromPosts (posts) {
 }
 
 
-// Copy css:
-fs.copyDir(join(settings.templateDir, 'css'), settings.cssDir)
+// Copy assets:
+fs.copyDir(join(settings.themeDir, 'assets'), settings.assetsDir)
   .then(function () {
-    console.log('Css files copied...');
-  });
-
-// Copy fonts:
-fs.copyDir(join(settings.templateDir, 'font'), settings.fontDir)
-  .then(function () {
-    console.log('font files copied...');
+    console.log('Theme assets copied...');
   });
 

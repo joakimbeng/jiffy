@@ -2,18 +2,17 @@
 <!--[if lt IE 7]>      <html class="lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>         <html class="lt-ie9 lt-ie8"> <![endif]-->
 <!--[if IE 8]>         <html class="lt-ie9"> <![endif]-->
-<!--[if gt IE 8]><!-->
-<html>
+<!--[if gt IE 8]><!--> <html>
 <!--<![endif]-->
   <head>
     <meta charset="utf-8" />
     <title>{+title/}{blogTitle}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link href="{path}css/bootstrap.css" rel="stylesheet" />
-    <link href="{path}css/flat-ui.css" rel="stylesheet" />
-    <link href="{path}css/font-awesome.min.css" rel="stylesheet" />
-    <link href="{path}css/monokai_sublime.css" rel="stylesheet" />
-    <link href="{path}css/main.css" rel="stylesheet" />
+    <link href="{path}assets/css/bootstrap.css" rel="stylesheet" />
+    <link href="{path}assets/css/flat-ui.css" rel="stylesheet" />
+    <link href="{path}assets/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="{path}assets/css/monokai_sublime.css" rel="stylesheet" />
+    <link href="{path}assets/css/main.css" rel="stylesheet" />
   </head>
   <body>
     <div class="container">
