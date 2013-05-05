@@ -177,48 +177,32 @@ postsPromise.then(function (posts) {
     blogUrl: settings.url,
     blogProtocol: url.parse(settings.url).protocol || 'http://',
     disqusShortname: settings.services.disqus,
-    googleAnalytics: settings.services.googleAnalytics
+    googleAnalytics: settings.services.googleAnalytics,
+    tags: sortBy(getTagsFromPosts(posts), 'tag.name'),
+    categories: sortBy(getCategoriesFromPosts(posts), 'category.name')
   };
-
-  var tags = getTagsFromPosts(posts);
-
-  var categories = getCategoriesFromPosts(posts);
-
-  data.tags = toArray(tags);
-  sortBy(data.tags, 'tag.name');
-  data.categories = toArray(categories);
-  sortBy(data.categories, 'category.name');
-
 
   promises.concat(data.tags.map(function (tag) {
     var tagData = extend({path: '../', currentUrl: tag.tag.url, inTag: true}, tag, data);
 
-    return dust('tag', tagData).then(function (out) {
-      return fs.writeFile(join(settings.buildDir, tagData.tag.fileName), out, 'utf-8');
-    });
+    return build(tagData, 'tag', tagData.tag.fileName);
   }));
 
   promises.concat(data.categories.map(function (category) {
     var categoryData = extend({path: '../', currentUrl: category.category.url, inCategory: true}, category, data);
 
-    return dust('category', categoryData).then(function (out) {
-      return fs.writeFile(join(settings.buildDir, categoryData.category.fileName), out, 'utf-8');
-    });
+    return build(categoryData, 'category', categoryData.category.fileName);
   }));
 
-  promises = posts.map(function (post) {
+  promises.concat(posts.map(function (post) {
     var postData = extend({post: post, path: '../', currentUrl: post.url, inPost: true}, data);
 
-    return dust('post', postData).then(function (out) {
-      return fs.writeFile(join(settings.buildDir, post.fileName), out, 'utf-8');
-    });
-  });
+    return build(postData, 'post', post.fileName);
+  }));
 
   var indexData = extend({posts: posts, inIndex: true}, data);
 
-  var indexPromise = dust('index', indexData).then(function (out) {
-    return fs.writeFile(join(settings.buildDir, 'index.html'), out, 'utf-8');
-  });
+  var indexPromise = build(indexData, 'index', 'index.html');
 
   promises.push(indexPromise);
 
@@ -242,7 +226,7 @@ function getTagsFromPosts (posts) {
     });
   });
 
-  return tags;
+  return toArray(tags);
 }
 
 function getCategoriesFromPosts (posts) {
@@ -254,7 +238,13 @@ function getCategoriesFromPosts (posts) {
     categories[post.category.name].posts.push(post);
   });
 
-  return categories;
+  return toArray(categories);
+}
+
+function build (data, template, filename) {
+  return dust(template, data).then(function (out) {
+    return fs.writeFile(join(settings.buildDir, filename), out, 'utf-8');
+  });
 }
 
 
