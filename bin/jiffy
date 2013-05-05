@@ -5,19 +5,16 @@ var dir = process.cwd(),
     ext = require('path').extname,
     base = require('path').basename,
     dirname = require('path').dirname,
-    fs = require('klei-fs'),
-    exists = fs.existsSync,
-    ncp = require('ncp').ncp,
     marked = require('marked'),
-    kleiDust = require('klei-dust'),
     pkg = require('../package.json'),
     url = require('url'),
-    hljs = require('highlight.js'),
     q = require('q'),
     truncate = require('html-truncate'),
+    fs = require('../lib/fs'),
+    highlight = require('../lib/highlight'),
     complete = require('../lib/complete'),
     extend = require('../lib/extend'),
-    settings = require('../lib/settings')
+    settings = require('../lib/settings'),
     toArray = require('../lib/to-array');
 
 console.log('          __  __');
@@ -28,69 +25,15 @@ console.log('');
 
 settings = settings(dir);
 
-if (!exists(settings.postsDir))
-  throw new Error('Missing posts directory: "' + settings.postsDir + '"');
+// fs.exists(settings.postsDir).then(function (exists) {
+//   if (!exists)
+//     throw new Error('Missing posts directory: "' + settings.postsDir + '"');
+// });
 
 var started = Date.now();
 console.log('started');
 
-
-if (!exists(settings.buildDir)) {
-  console.log('Creating build directory...');
-  fs.mkdirSync(settings.buildDir, function (err) {
-    if (err) throw err;
-  });
-}
-
-if (!exists(settings.cssDir)) {
-  console.log('Creating css directory...');
-  fs.mkdirSync(settings.cssDir, function (err) {
-    if (err) throw err;
-  });
-}
-
-if (!exists(settings.fontDir)) {
-  console.log('Creating font directory...');
-  fs.mkdirSync(settings.fontDir, function (err) {
-    if (err) throw err;
-  });
-}
-
-if (!exists(join(settings.buildDir, 'tags'))) {
-  console.log('Creating tags directory...');
-  fs.mkdirSync(join(settings.buildDir, 'tags'), function (err) {
-    if (err) throw err;
-  });
-}
-
-if (!exists(join(settings.buildDir, 'posts'))) {
-  console.log('Creating posts directory...');
-  fs.mkdirSync(join(settings.buildDir, 'posts'), function (err) {
-    if (err) throw err;
-  });
-}
-
-if (!exists(join(settings.buildDir, 'category'))) {
-  console.log('Creating category directory...');
-  fs.mkdirSync(join(settings.buildDir, 'category'), function (err) {
-    if (err) throw err;
-  });
-}
-
-
-kleiDust.setOptions({
-  root: settings.templateDir,
-  useHelpers: true
-});
-
-var highlight = function(code, lang){
-  if(!hljs) return code;
-  if(lang === undefined || !hljs.LANGUAGES[lang]){
-    lang = hljs.highlightAuto(code).language;
-    if(!lang) return code;
-  }
-  return hljs.highlight(lang, code).value;
-};
+var dust = require('../lib/dust')(settings.templateDir);
 
 
 function getPostDate(dir) {
@@ -109,20 +52,12 @@ function urlFriendlyName (name) {
   return name.toLowerCase().split(' ').join('-');
 }
 
-fs.readJson = function (file, cb) {
-  fs.readFile(file, 'utf-8', function (err, source) {
-    if (err) return cb(err);
-    return cb(null, JSON.parse(source));
-  });
-};
-
-var readDir = q.denodeify(fs.readdir);
-var readFile = q.denodeify(fs.readFile);
-var readJson = q.denodeify(fs.readJson);
-var stat = q.denodeify(fs.stat);
-var dust = q.denodeify(kleiDust.dust);
-var writeFile = q.denodeify(fs.writeFile);
-var copy = q.denodeify(ncp);
+// var readDir = q.denodeify(fs.readdir);
+// var readFile = q.denodeify(fs.readFile);
+// var readJson = q.denodeify(fs.readJson);
+// var stat = q.denodeify(fs.stat);
+// var writeFile = q.denodeify(fs.writeFile);
+// var copy = q.denodeify(ncp);
 
 function isJson (file) {
   return ext(file) === '.json';
@@ -133,7 +68,7 @@ function isMarkdown (file) {
 }
 
 
-var postsPromise = readDir(settings.postsDir).then(function (postDirs) {
+var postsPromise = fs.readDir(settings.postsDir).then(function (postDirs) {
   return q.all(postDirs.map(function (dir) {
     var post = {};
         post.name = getPostName(dir);
@@ -151,18 +86,18 @@ var postsPromise = readDir(settings.postsDir).then(function (postDirs) {
     var hasPost = false,
         hasMeta = false;
 
-    readDir(join(settings.postsDir, dir)).then(function (files) {
+    fs.readDir(join(settings.postsDir, dir)).then(function (files) {
       files.forEach(function (fileName) {
         var file = join(settings.postsDir, dir, fileName);
         if (isMarkdown(file)) {
           hasPost = true;
-          markdown.resolve(readFile(file, 'utf-8'));
-          stat(file).then(function (stats) {
+          markdown.resolve(fs.readFile(file, 'utf-8'));
+          fs.stat(file).then(function (stats) {
             modified.resolve(stats.mtime);
           });
         } else if (isJson(file)) {
           hasMeta = true;
-          meta.resolve(readJson(file));
+          meta.resolve(fs.readJson(file));
         }
       });
       if (!hasPost)
@@ -292,7 +227,7 @@ postsPromise.then(function (posts) {
     var tagData = extend({path: '../', currentUrl: tag.tag.url, inTag: true}, tag, data);
 
     return dust('tag', tagData).then(function (out) {
-      return writeFile(join(settings.buildDir, tagData.tag.fileName), out, 'utf-8');
+      return fs.writeFile(join(settings.buildDir, tagData.tag.fileName), out, 'utf-8');
     });
   }));
 
@@ -300,7 +235,7 @@ postsPromise.then(function (posts) {
     var categoryData = extend({path: '../', currentUrl: category.category.url, inCategory: true}, category, data);
 
     return dust('category', categoryData).then(function (out) {
-      return writeFile(join(settings.buildDir, categoryData.category.fileName), out, 'utf-8');
+      return fs.writeFile(join(settings.buildDir, categoryData.category.fileName), out, 'utf-8');
     });
   }));
 
@@ -308,14 +243,14 @@ postsPromise.then(function (posts) {
     var postData = extend({post: post, path: '../', currentUrl: post.url, inPost: true}, data);
 
     return dust('post', postData).then(function (out) {
-      return writeFile(join(settings.buildDir, post.fileName), out, 'utf-8');
+      return fs.writeFile(join(settings.buildDir, post.fileName), out, 'utf-8');
     });
   });
 
   var indexData = extend({posts: posts, inIndex: true}, data);
 
   var indexPromise = dust('index', indexData).then(function (out) {
-    return writeFile(join(settings.buildDir, 'index.html'), out, 'utf-8');
+    return fs.writeFile(join(settings.buildDir, 'index.html'), out, 'utf-8');
   });
 
   promises.push(indexPromise);
@@ -371,13 +306,13 @@ function getCategoriesFromPosts (posts) {
 
 
 // Copy css:
-copy(join(settings.templateDir, 'css'), settings.cssDir)
+fs.copyDir(join(settings.templateDir, 'css'), settings.cssDir)
   .then(function () {
     console.log('Css files copied...');
   });
 
 // Copy fonts:
-copy(join(settings.templateDir, 'font'), settings.fontDir)
+fs.copyDir(join(settings.templateDir, 'font'), settings.fontDir)
   .then(function () {
     console.log('font files copied...');
   });
