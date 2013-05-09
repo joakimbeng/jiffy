@@ -1,27 +1,39 @@
 #!/usr/bin/env node
 
-var pkg = require('../package.json'),
-    reader = require('../lib/reader'),
-    builder = require('../lib/builder');
+var reader = require('../lib/reader'),
+    builder = require('../lib/builder'),
+    printer = require('../lib/printer'),
+    cli = require('../lib/cli');
 
-console.log('          __  __');
-console.log('     / ´ /_  /_');
-console.log('  __/ / /   /  /__/  v.' + pkg.version);
-console.log('               __/');
-console.log('');
+var commands = [
+  {name: 'build', description: 'Build the blog', default: true}
+  // {name: 'init', description: 'Initialize a new blog in the current folder'}
+];
+
+cli = cli(commands);
 
 // fs.exists(settings.postsDir).then(function (exists) {
 //   if (!exists)
 //     throw new Error('Missing posts directory: "' + settings.postsDir + '"');
 // });
 
-var started = Date.now();
-console.log('started');
+switch (cli.command) {
+  case 'init':
+    console.log('Initialize new blog...');
+    break;
+  case 'build':
+    build();
+    break;
+}
 
+function build () {
+  var started = Date.now();
+  printer.info('Building...\n');
 
-reader.read()
-  .then(builder.build)
-  .then(function () {
-    console.log('done', Date.now() - started);
-  });
-
+  reader.read()
+    .then(builder.build)
+    .then(function () {
+      printer.ok('done in ' + ((Date.now() - started)/1000).toFixed(2) + ' s\n');
+    })
+    .fail(printer.fatal);
+}

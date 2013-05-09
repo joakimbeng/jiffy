@@ -21,6 +21,7 @@
     "html-truncate": "~1.0.3",
     "dustjs-helpers": "~1.1.1",
     "ncp": "~0.4.2",
-    "slug": "~0.2.2"
+    "slug": "~0.2.2",
+    "ansi": "~0.1.2"
   }
 }
