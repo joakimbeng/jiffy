@@ -5,8 +5,7 @@
     </div>
     <div class="span5">
       <div class="footer-banner">
-        <h3 class="footer-title">Kontakt</h3>
-        <p>Lorem ipsum...</p>
+        <p class="footer-title">Built in a <a href="http://github.com/joakimbeng/jiffy">jiffy</a>...</p>
       </div>
     </div>
   </div>
