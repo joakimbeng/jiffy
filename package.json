@@ -1,6 +1,6 @@
 {
   "name": "jiffy",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Make a blog in a jiffy. Jiffy is a static blog generator.",
   "main": "index.js",
   "repository": "git://github.com/joakimbeng/jiffy.git",
@@ -14,6 +14,9 @@
   "author": "Joakim Bengtson <joakim@klei.se>",
   "license": "MIT",
   "preferGlobal": true,
+  "bin": {
+    "jiffy": "./bin/jiffy"
+  },
   "dependencies": {
     "marked": "~0.2.8",
     "klei-fs": "*",
