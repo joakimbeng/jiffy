@@ -2,8 +2,6 @@
 
 var printer = require('../lib/printer'),
     cli = require('../lib/cli'),
-    fs = require('../lib/fs'),
-    path = require('../lib/path'),
     q = require('q');
 
 var commands = [
@@ -11,9 +9,9 @@ var commands = [
   {name: 'init', description: 'Initialize a new blog in the current folder'}
 ];
 
-cli = cli(commands);
+params = cli.init(commands);
 
-switch (cli.command) {
+switch (params.command) {
   case 'init':
     init();
     break;
@@ -23,100 +21,35 @@ switch (cli.command) {
 }
 
 function init () {
-  checkForConfig()
-    .then(function (exists) {
-      if (exists)
-        throw new Error('A "jiffy.json" already exists in current directory,\ncan\'t initialize a new blog here');
-      return {};
-    })
-    .then(function (config) {
-      printer.info('Alright! Let\'s make a blog!\n\n');
-      return [config, cli.ask('What do you want to name your blog?', {default: 'My jiffy blog!'})];
-    })
-    .spread(function (config, title) {
-      config.title = title;
-
-      return [config, cli.ask('What\'s the URL for the blog going to be?', {default: 'http://example.com'})];
-    })
-    .spread(function (config, url) {
-      config.url = url;
-
-      return [config, cli.ask('What\'s your name? (used as author information)', {default: 'Jane Doe'})];
-    })
-    .spread(function (config, name) {
-      var author = {
-        identifier: getAuthorKeyFromName(name),
-        name: name,
-        default: true
-      };
-      config.authors = [author];
-
-      return config;
-    })
-    .then(function (config) {
-      // Defaults:
-      config.truncate = 500;
-
-      return config;
-    })
-    .then(function (config) {
-      printer.info('\nThis is the jiffy.json that is going to be generated:\n\n');
-      config = printer.json(config, 'CARROT');
-      return [config, cli.ask('\nDoes this look ok?', {default: 'y', type: 'boolean'})];
-    })
-    .spread(function (config, doSave) {
-      if (!doSave) {
-        printer.error('Exiting...\n');
-        process.exit();
-      }
-      printer.info('\nSaving json...\n');
-      return fs.writeFile('jiffy.json', config, 'utf8');
-    })
-    .then(function () {
-      printer.info('Writing example post...\n');
-      var dir = path.join('posts', (new Date()).toISOString().slice(0, 10) + ' - An example post');
-      return fs.copyDir(path.join(__dirname, '..', 'example'), dir);
-    })
-    .then(build)
-    .then(function () {
-      printer.ok('\nOpen the build/index.html in your browser to view the result!\n');
-    })
-    .fail(printer.fatal);
-}
-
-function getAuthorKeyFromName (name) {
-  if (name.length <= 1) {
-    throw new Error('A name must be at least two characters long!');
-  }
-  var parts = name.split(' ');
-  if (parts.length === 1) {
-    return (name[0] + name[1]).toLowerCase();
-  }
-  return parts.reduce(function (prev, current) {
-    return prev + current[0].toLowerCase();
-  }, '');
-}
-
-function build () {
-  return q.try(function () {
-    return [
-      require('../lib/reader'),
-      require('../lib/builder')
-    ]
+  q.try(function () {
+    return require('../lib/initializer');
   })
-  .spread(function (reader, builder) {
-    var started = Date.now();
-    printer.info('Building...\n');
-
-    return reader.read()
-      .then(builder.build)
+  .then(function (initializer) {
+    return initializer.initialize()
+      .then(build)
       .then(function () {
-        printer.ok('Build done in ' + ((Date.now() - started)/1000).toFixed(2) + ' s\n');
+        printer.ok('\nOpen the build/index.html in your browser to view the result!\n');
       });
   })
   .fail(printer.fatal);
 }
 
-function checkForConfig () {
-  return fs.exists(path.join(process.cwd(), 'jiffy.json'));
+function build () {
+  return q.try(function () {
+      return [
+        require('../lib/reader'),
+        require('../lib/builder')
+      ]
+    })
+    .spread(function (reader, builder) {
+      var started = Date.now();
+      printer.info('Building...\n');
+
+      return reader.read()
+        .then(builder.build)
+        .then(function () {
+          printer.ok('Build done in ' + ((Date.now() - started)/1000).toFixed(2) + ' s\n');
+        });
+    })
+    .fail(printer.fatal);
 }
