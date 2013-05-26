@@ -31,6 +31,14 @@ To initiate a new blog in an empty directory run:
 
 And follow the walkthrough.
 
+#### Create a new blog post
+
+To create a new blog post for your Jiffy blog run:
+
+    $ jiffy post "<Blog post title>"
+
+**Note:** If blog title is not provided Jiffy will ask for it.
+
 #### Building/Compiling your blog
 
 To build your nice new blog you can run either:
@@ -63,6 +71,8 @@ Just create a markdown file with a name in the format `<YYYY-MM-DD> - <Blog titl
 
 Create a folder in `./posts` with a name in the format `<YYYY-MM-DD> - <Blog title>` and create a markdown file in that directory with your blog post content, e.g: `./posts/2013-05-20 - My first post/post.md` (the name for the markdown file doesn't matter, as long as it has the extension `.md` or `.markdown`).
 
+**Note:** This is the preffered method and is used by the `jiffy post` command.
+
 #### Post meta
 
 Create a json file in your post folder, e.g: `./posts/2013-05-20 - My first post/meta.json` (the name for the file doesn't matter as long as it has the extension `.json`).
@@ -81,7 +91,7 @@ Example:
 
 Where `author` is the identifier for the author and if omitted the default author is used, see Configuration section below for more information.
 
-#### Assets **WIP**
+#### Assets *WIP*
 
 This alternative way of creating blog posts has the advantage that you can put all your blog post assets, i.e. images, in the same folder as the post content and meta and refer to them relative to your post folder, e.g: `![My image](image.jpg)`, in your markdown and Jiffy will take care of the rest.
 
