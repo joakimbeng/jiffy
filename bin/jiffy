@@ -7,6 +7,7 @@ var printer = require('../lib/printer'),
 var commands = [
   {name: 'build', description: 'Build the blog', default: true},
   {name: 'init', description: 'Initialize a new blog in the current folder'},
+  {name: 'post', description: 'Create a new blog post with given name'},
   {name: 'new-theme', description: 'Create a new theme, with default theme as boilerplate'}
 ];
 
@@ -18,6 +19,9 @@ switch (params.command) {
     break;
   case 'build':
     build();
+    break;
+  case 'post':
+    post();
     break;
   case 'new-theme':
     newTheme();
@@ -56,6 +60,35 @@ function build () {
         });
     })
     .fail(printer.fatal);
+}
+
+function post () {
+  var fs = require('../lib/fs'),
+      settings = require('../lib/settings'),
+      path = require('../lib/path'),
+      printer = require('../lib/printer');
+  q.try(function () {
+    var postName = params.arguments.join(' ');
+    if (postName) {
+      return postName;
+    }
+    return cli.ask('What do you want to name your new blog post?');
+  })
+  .then(function (postName) {
+    var postDir = path.join(settings.postsDir, (new Date()).toISOString().slice(0, 10) + ' - ' + postName);
+    printer.info('Creating post "' + postName + '" in "./' + path.basename(path.dirname(postDir)) + '/' + path.basename(postDir) + '/"\n');
+    return [postName, postDir, fs.mkdir(postDir)];
+  })
+  .spread(function (postName, postDir) {
+    return [
+      fs.writeFile(path.join(postDir, 'post.md'), postName + '\n' + (new Array(postName.length + 1)).join('=') + '\n', 'utf8'),
+      fs.writeFile(path.join(postDir, 'meta.json'), '{\n}\n', 'utf8')
+    ]
+  })
+  .spread(function () {
+    printer.ok('Done!\n');
+  })
+  .fail(printer.fatal);
 }
 
 function newTheme () {
