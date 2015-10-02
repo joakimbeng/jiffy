@@ -9,27 +9,34 @@
     "jekyll",
     "static blog",
     "static generator",
+    "dustjs",
+    "dust",
     "markdown"
   ],
-  "author": "Joakim Bengtson <joakim@klei.se>",
+  "author": "Joakim Carlstein <joakim@klei.se>",
   "license": "MIT",
   "preferGlobal": true,
   "bin": {
     "jiffy": "./bin/jiffy"
   },
   "dependencies": {
-    "marked": "~0.2.8",
-    "klei-fs": "*",
-    "color-marked": "~0.2.0",
-    "klei-dust": "~0.6.7",
-    "q": "~0.9.3",
-    "highlight.js": "~7.3.0",
-    "dustjs-linkedin": "~1.2.4",
-    "html-truncate": "~1.0.3",
-    "dustjs-helpers": "~1.1.1",
-    "ncp": "~0.4.2",
-    "slug": "~0.2.2",
     "ansi": "~0.1.2",
-    "pretty-data": "~0.40.0"
+    "color-marked": "~0.3.3",
+    "dustjs-helpers": "~1.7.3",
+    "dustjs-linkedin": "~2.7.2",
+    "highlight.js": "~7.3.0",
+    "html-truncate": "~1.2.1",
+    "klei-dust": "~0.6.7",
+    "klei-fs": "*",
+    "marked": "~0.3.5",
+    "ncp": "~0.4.2",
+    "object-assign": "^4.0.1",
+    "object-values": "^1.0.0",
+    "pretty-data": "~0.40.0",
+    "promise-all": "^1.0.0",
+    "q": "~0.9.3",
+    "slug": "~0.9.1",
+    "sort-by": "^1.1.1",
+    "striptags": "^2.0.3"
   }
 }
