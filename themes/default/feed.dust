@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+  <channel>
+    <title><![CDATA[{blogTitle}]]></title>
+    <description><![CDATA[{blogDescription}]]></description>
+    <link>{blogUrl}</link>
+    <generator>Jiffy RSS generator</generator>
+    <lastBuildDate>{lastBuildDate}</lastBuildDate>
+    <atom:link href="{blogUrl}/rss.xml" rel="self" type="application/rss+xml"/>
+    <author><![CDATA[{defaultAuthor.name}]]></author>
+    <ttl>60</ttl>
+    {#posts}
+    <item>
+      <title><![CDATA[{name}]]></title>
+      <description>
+        <![CDATA[{content|s}]]>
+      </description>
+      <link>{blogUrl}/{url}</link>
+      <guid isPermaLink="false">{guid}</guid>
+      <dc:creator><![CDATA[{author.name}]]></dc:creator>
+      <pubDate>{pubDate}</pubDate>
+    </item>
+    {/posts}
+  </channel>
+</rss>
