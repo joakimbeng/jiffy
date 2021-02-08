@@ -29,7 +29,7 @@
     "html-truncate": "~1.2.2",
     "klei-dust": "~1.0.0",
     "klei-fs": "*",
-    "marked": "~1.2.7",
+    "marked": "~2.0.0",
     "ncp": "~0.4.2",
     "pretty-data": "~0.40.0",
     "promise-all": "^1.0.0",
