@@ -24,7 +24,7 @@
     "color-marked": "~0.3.3",
     "dustjs-helper-formatdate": "^0.2.1",
     "dustjs-helpers": "~1.7.4",
-    "dustjs-linkedin": "~2.7.5",
+    "dustjs-linkedin": "~3.0.0",
     "highlight.js": "~10.5.0",
     "html-truncate": "~1.2.2",
     "klei-dust": "~1.0.0",
